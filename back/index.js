@@ -20,10 +20,12 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 app.post('/', (req, res, next) => {
-    console.log(req.body.url);
-    ytdl(req.body.url, {filter: 'audioonly'})
-      .pipe(fs.createWriteStream('video.mp4'));
-    res.send(req.body);
-    next();
-  }
-);
+  ytdl(req.body.url, { filter: 'audioonly' })
+    .pipe(fs.createWriteStream('video.mp4'));
+  res.json({ fileName: 'FileName.mp4' });
+  next();
+});
+
+app.get('/download', (req, res, next) => {
+  res.download('./video.mp4');
+});

@@ -1,7 +1,7 @@
 {
-	"name" : "SherLock",
+	"name" : "Converter",
 	"version" : "1.0",
-	"description" : "Chiffrement de mot de passe",
+	"description" : "Convertisseur de vidéo youtube",
 	"browser_action" : {
 		"default_popup" : "popup.html"
 	},
@@ -12,7 +12,8 @@
 		}
 	],
 	"permissions": [
-		"storage"
+		"storage",
+		"downloads"
 	],
 	"manifest_version" : 2
 }
