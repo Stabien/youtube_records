@@ -5,15 +5,22 @@
 	"browser_action" : {
 		"default_popup" : "popup.html"
 	},
+	"background": {
+    "scripts": ["js/background.js"],
+		"persistent": false
+  },
 	"content_scripts" : [
 		{
 			"matches" : ["<all_urls>"],
-			"js" : ["js/content.js"]
+			"js" : ["js/content.js"],
+			"persistent": true
 		}
 	],
 	"permissions": [
 		"storage",
-		"downloads"
+		"downloads",
+		"tabs",
+		"<all_urls>"
 	],
 	"manifest_version" : 2
 }

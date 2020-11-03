@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const ytdl = require('ytdl-core');
+const { getInfo } = require('ytdl-getinfo');
 const fs = require('fs');
 
 const app = express();
@@ -19,13 +20,17 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.post('/', (req, res, next) => {
-  ytdl(req.body.url, { filter: 'audioonly' })
-    .pipe(fs.createWriteStream('video.mp4'));
-  res.json({ fileName: 'FileName.mp4' });
-  next();
+app.post('/', async (req, res, next) => {
+  getInfo(req.body.url)
+  .then(async (info) => {
+    let title = info.items[0].title + '.mp4';
+    await ytdl(req.body.url, { filter: 'audioonly' })
+      .pipe(fs.createWriteStream(title));
+    res.json({ fileName: title });
+    next();
+  });
 });
 
-app.get('/download', (req, res, next) => {
+app.get('/download', (req, res) => {
   res.download('./video.mp4');
 });

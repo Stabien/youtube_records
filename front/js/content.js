@@ -1,30 +1,27 @@
-chrome.runtime.onMessage.addListener(function(request) {
-	var url = window.location.href;
-	var input = document.getElementsByTagName('input');
-
-	if (request === 'hash_password') {
-		chrome.storage.sync.get(url, function(result) {
-			console.log(Object.values(result));
-			if (Object.values(result).length === 0) 
-				alert('Aucun mot de passe trouvé pour ce site');
-			else {
-				for (var i = 0; i < input.length; i++) {
-					if (input[i].getAttribute('type') === 'password') {
-						let input_passwd = input[i];
-						input_passwd.value = Object.values(result);
-					}
-					console.log(Object.values(result));
-				}
-			}
+chrome.runtime.onMessage.addListener((request) => {
+	if (request === "API") {
+		let body = {
+			url: window.location.href
+		};
+		alert('Convertion en cours');
+		console.log(body.url);
+		fetch("http://localhost:8080/", {
+				method: "POST",
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify(body)
+		})
+		.then(response => response.json())
+		.then(response => {
+			console.log(response.fileName);
+			fetch("http://localhost:8080/download")
+				.then(file => file.blob())
+				.then(blob => {
+					const url = window.URL.createObjectURL(blob);
+					console.log(url);
+					chrome.runtime.sendMessage({url: url, message: "download", fileName: response.fileName});
+				});
+				console.log('ok');
+			console.log(response);
 		});
-	}
-	if (request === 'add_password') {
-		var passwd = prompt('Veuillez saisir un mot de passe');
-		var id = {};
-
-		id[url] = passwd;
-
-		if (passwd != null && passwd.length != 0) 
-			chrome.storage.sync.set(id);
 	}
 });
