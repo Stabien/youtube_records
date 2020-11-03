@@ -20,17 +20,28 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
-app.post('/', async (req, res, next) => {
-  getInfo(req.body.url)
-  .then(async (info) => {
-    let title = info.items[0].title + '.mp4';
-    await ytdl(req.body.url, { filter: 'audioonly' })
+app.post('/', (req, res, next) => {
+  let title;
+
+  getInfo(req.body.url).then((info) => {
+    title = info.items[0].title + '.mp4';
+    ytdl(req.body.url, { filter: 'audioonly' })
       .pipe(fs.createWriteStream(title));
+
+    setTimeout(() => {
+      fs.unlink(title, err => {
+        if (err) throw err;
+        console.log('file deleted');
+      });
+    }, 30000);
+
     res.json({ fileName: title });
     next();
   });
 });
 
-app.get('/download', (req, res) => {
-  res.download('./video.mp4');
+app.post('/download', (req, res) => {
+  console.log(req.body.fileName);
+  console.log('test');
+  res.download(req.body.fileName);
 });

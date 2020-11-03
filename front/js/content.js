@@ -13,14 +13,20 @@ chrome.runtime.onMessage.addListener((request) => {
 		.then(response => response.json())
 		.then(response => {
 			console.log(response.fileName);
-			fetch("http://localhost:8080/download")
-				.then(file => file.blob())
-				.then(blob => {
-					const url = window.URL.createObjectURL(blob);
-					console.log(url);
-					chrome.runtime.sendMessage({url: url, message: "download", fileName: response.fileName});
-				});
-				console.log('ok');
+			setTimeout(() => {
+				fetch("http://localhost:8080/download", {
+					method: "POST",
+					headers: {'Content-Type': 'application/json'},
+					body: JSON.stringify(response)
+				})
+					.then(file => file.blob())
+					.then(blob => {
+						const url = window.URL.createObjectURL(blob);
+						console.log(url);
+						chrome.runtime.sendMessage({url: url, message: "download", fileName: response.fileName});
+					});
+					console.log('ok');
+			}, 5000);
 			console.log(response);
 		});
 	}
