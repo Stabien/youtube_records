@@ -8,7 +8,7 @@ chrome.runtime.onMessage.addListener((request) => {
 			alert("Mauvaise URL");
 			return false;
 		}
-		alert('Conversion en cours');
+		alert('Conversion en cours\nLe téléchargement se fera d\'ici quelques secondes');
 		fetch("http://localhost:8080/", {
 				method: "POST",
 				headers: {'Content-Type': 'application/json'},

@@ -10,9 +10,13 @@
   "author": "Stabien",
   "license": "ISC",
   "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.0.20",
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "ffmpeg": "0.0.4",
+    "fluent-ffmpeg": "^2.1.2",
     "nodemon": "^2.0.6",
+    "video-converter": "^1.0.0",
     "ytdl-core": "^4.0.2",
     "ytdl-getinfo": "^1.1.0"
   }

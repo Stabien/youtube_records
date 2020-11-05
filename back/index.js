@@ -3,7 +3,9 @@ const bodyParser = require('body-parser');
 const ytdl = require('ytdl-core');
 const { getInfo } = require('ytdl-getinfo');
 const fs = require('fs');
-
+const converter = require('video-converter');
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
+const ffmpeg = require('fluent-ffmpeg');
 const app = express();
 const PORT = 8080;
 
@@ -22,26 +24,37 @@ app.use(bodyParser.json());
 
 app.post('/', (req, res, next) => {
   let title;
+  getInfo(req.body.url).then(async (info) => {
+    // Create file
+    title = info.items[0].title;
+    ytdl(req.body.url, { filter: 'audioonly'})
+      .pipe(fs.createWriteStream(title + '.mp4'))
+      .on('finish', () => {
+        // Convert from mp4 to mp3
+        ffmpeg.setFfmpegPath(ffmpegPath);
+        console.log('conversion');
+        new ffmpeg({ source: title + '.mp4' })
+          .saveToFile(title + '.mp3')
+          .on('end', () => {
+            // Send response
+            console.log('response');
+            res.json({ fileName: title + '.mp3' });
+            next();
+          });
+      });
 
-  getInfo(req.body.url).then((info) => {
-    title = info.items[0].title + '.mp4';
-    ytdl(req.body.url, { filter: 'audioonly' })
-      .pipe(fs.createWriteStream(title));
-
+    // Delete file after 30s
     setTimeout(() => {
-      fs.unlink(title, err => {
-        if (err) throw err;
+      fs.unlink(title + '.mp4', err => {
         console.log('file deleted');
       });
-    }, 30000);
-
-    res.json({ fileName: title });
-    next();
+      fs.unlink(title + '.mp3', err => {
+        console.log('file deleted');
+      });
+    }, 60000);
   });
 });
 
 app.post('/download', (req, res) => {
-  console.log(req.body.fileName);
-  console.log('test');
   res.download(req.body.fileName);
 });
