@@ -6,6 +6,7 @@ const fs = require('fs');
 const converter = require('video-converter');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
+
 const app = express();
 const PORT = 8080;
 
@@ -23,35 +24,30 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 app.post('/', (req, res, next) => {
-  let title;
   getInfo(req.body.url).then(async (info) => {
+    const title = info.items[0].title;
     // Create file
-    title = info.items[0].title;
     ytdl(req.body.url, { filter: 'audioonly'})
       .pipe(fs.createWriteStream(title + '.mp4'))
       .on('finish', () => {
         // Convert from mp4 to mp3
         ffmpeg.setFfmpegPath(ffmpegPath);
-        console.log('conversion');
         new ffmpeg({ source: title + '.mp4' })
           .saveToFile(title + '.mp3')
           .on('end', () => {
             // Send response
-            console.log('response');
             res.json({ fileName: title + '.mp3' });
-            next();
           });
       });
-
-    // Delete file after 30s
+    // Delete files after 90s
     setTimeout(() => {
       fs.unlink(title + '.mp4', err => {
-        console.log('file deleted');
+        console.log('mp4 file deleted');
       });
       fs.unlink(title + '.mp3', err => {
-        console.log('file deleted');
+        console.log('mp3 file deleted');
       });
-    }, 60000);
+    }, 300000);
   });
 });
 

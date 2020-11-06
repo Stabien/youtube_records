@@ -8,27 +8,27 @@ chrome.runtime.onMessage.addListener((request) => {
 			alert("Mauvaise URL");
 			return false;
 		}
-		alert('Conversion en cours\nLe téléchargement se fera d\'ici quelques secondes');
+		alert('Conversion en cours');
+		chrome.runtime.sendMessage({ message: 'downloadIcon' });
+		alert('test');
 		fetch("http://localhost:8080/", {
-				method: "POST",
-				headers: {'Content-Type': 'application/json'},
-				body: JSON.stringify(body)
+			method: "POST",
+			headers: {'Content-Type': 'application/json'},
+			body: JSON.stringify(body)
 		})
 		.then(response => response.json())
 		.then(response => {
-			setTimeout(() => {
-				fetch("http://localhost:8080/download", {
-					method: "POST",
-					headers: {'Content-Type': 'application/json'},
-					body: JSON.stringify(response)
-				})
-					.then(file => file.blob())
-					.then(blob => {
-						const url = window.URL.createObjectURL(blob);
-						chrome.runtime.sendMessage({ url: url, message: "download", fileName: response.fileName });
-					});
-			}, 5000);
-			console.log(response);
+			fetch("http://localhost:8080/download", {
+				method: "POST",
+				headers: {'Content-Type': 'application/json'},
+				body: JSON.stringify(response)
+			})
+			.then(file => file.blob())
+			.then(blob => {
+				const url = window.URL.createObjectURL(blob);
+				chrome.runtime.sendMessage({ url: url, message: "download", fileName: response.fileName });
+				chrome.runtime.sendMessage({ message: 'defaultIcon' });
+			});
 		});
 	}
 });
