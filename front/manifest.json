@@ -4,11 +4,11 @@
 	"description" : "Convertisseur de vidéo youtube",
 	"browser_action": {
 		"default_popup" : "default_popup.html",
-		"default_icon": "icon_1.png",
+		"default_icon": "assets/icon_1.png",
 		"icons": {
-			"16": "icon_1_16.png",
-      "48": "icon_1_48.png",
-      "128": "icon_1.png"
+			"16": "assets/icon_1_16.png",
+      "48": "assets/icon_1_48.png",
+      "128": "assets/icon_1.png"
 		}
 	},
 	"background": {

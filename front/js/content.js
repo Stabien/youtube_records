@@ -10,7 +10,6 @@ chrome.runtime.onMessage.addListener((request) => {
 		}
 		alert('Conversion en cours');
 		chrome.runtime.sendMessage({ message: 'downloadIcon' });
-		alert('test');
 		fetch("http://localhost:8080/", {
 			method: "POST",
 			headers: {'Content-Type': 'application/json'},

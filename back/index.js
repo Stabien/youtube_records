@@ -24,33 +24,45 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 app.post('/', (req, res, next) => {
-  getInfo(req.body.url).then(async (info) => {
-    const title = info.items[0].title;
-    // Create file
-    ytdl(req.body.url, { filter: 'audioonly'})
-      .pipe(fs.createWriteStream(title + '.mp4'))
-      .on('finish', () => {
-        // Convert from mp4 to mp3
-        ffmpeg.setFfmpegPath(ffmpegPath);
-        new ffmpeg({ source: title + '.mp4' })
-          .saveToFile(title + '.mp3')
-          .on('end', () => {
-            // Send response
-            res.json({ fileName: title + '.mp3' });
+  let handleRequest = (req, res, next) => {
+    getInfo(req.body.url)
+      .catch(err => {
+        console.log(err);
+        handleRequest(req, res, next);
+      })
+      .then(async (info) => {
+        const title = info.items[0].title;
+        const titleServerSide = title + Date.now();
+        // Create file
+        ytdl(req.body.url, { filter: 'audioonly'})
+          .pipe(fs.createWriteStream(titleServerSide + '.mp4'))
+          .on('finish', () => {
+            // Convert from mp4 to mp3
+            ffmpeg.setFfmpegPath(ffmpegPath);
+            new ffmpeg({ source: titleServerSide + '.mp4' })
+              .saveToFile(titleServerSide + '.mp3')
+              .on('end', () => {
+                // Send response
+                res.json({
+                  fileName: title + '.mp3',
+                  fileNameServerSide: titleServerSide
+                });
+              });
           });
       });
-    // Delete files after 90s
-    setTimeout(() => {
-      fs.unlink(title + '.mp4', err => {
-        console.log('mp4 file deleted');
-      });
-      fs.unlink(title + '.mp3', err => {
-        console.log('mp3 file deleted');
-      });
-    }, 300000);
-  });
+  }
+  handleRequest(req, res, next);
 });
 
 app.post('/download', (req, res) => {
-  res.download(req.body.fileName);
+  res.download(req.body.fileNameServerSide + '.mp3');
+  // Delete files
+  setTimeout(() => {
+    fs.unlink(req.body.fileNameServerSide + '.mp4', err => {
+      console.log('mp4 file deleted');
+    });
+    fs.unlink(req.body.fileNameServerSide + '.mp3', err => {
+      console.log('mp3 file deleted');
+    });
+  }, 300000);
 });

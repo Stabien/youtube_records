@@ -7,9 +7,9 @@ chrome.runtime.onMessage.addListener((request) => {
 			chrome.browserAction.setIcon({
 				tabId: tab.id,
 				path: {
-					"16": "../icon_2_16.png",
-					"48": "../icon_2_48.png",
-					"128": "../icon_2.png"
+					"16": "../assets/icon_2_16.png",
+					"48": "../assets/icon_2_48.png",
+					"128": "../assets/icon_2.png"
 				}
 			});
 			chrome.browserAction.setPopup({ popup: "download_popup.html" });
@@ -20,9 +20,9 @@ chrome.runtime.onMessage.addListener((request) => {
 			chrome.browserAction.setIcon({
 				tabId: tab.id,
 				path: {
-					"16": "../icon_1_16.png",
-					"48": "../icon_1_48.png",
-					"128": "../icon_1.png"
+					"16": "../assets/icon_1_16.png",
+					"48": "../assets/icon_1_48.png",
+					"128": "../assets/icon_1.png"
 				}
 			});
 			chrome.browserAction.setPopup({ popup: "default_popup.html" });
