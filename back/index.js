@@ -24,17 +24,20 @@ app.use((req, res, next) => {
 app.use(bodyParser.json());
 
 app.post('/', (req, res, next) => {
+  let nbRecursiveCalls = 0;
   let handleRequest = (req, res, next) => {
     getInfo(req.body.url)
       .catch(err => {
         console.log(err);
-        handleRequest(req, res, next);
+        if (nbRecursiveCalls <= 10)
+          handleRequest(req, res, next);
+        nbRecursiveCalls++;
       })
-      .then(async (info) => {
+      .then((info) => {
         const title = info.items[0].title;
         const titleServerSide = title + Date.now();
         // Create file
-        ytdl(req.body.url, { filter: 'audioonly'})
+        ytdl(req.body.url, { filter: 'audioonly' })
           .pipe(fs.createWriteStream(titleServerSide + '.mp4'))
           .on('finish', () => {
             // Convert from mp4 to mp3
@@ -42,6 +45,15 @@ app.post('/', (req, res, next) => {
             new ffmpeg({ source: titleServerSide + '.mp4' })
               .saveToFile(titleServerSide + '.mp3')
               .on('end', () => {
+                // Delete files
+                setTimeout(() => {
+                  fs.unlink(titleServerSide + '.mp4', err => {
+                    console.log('mp4 file deleted');
+                  });
+                  fs.unlink(titleServerSide + '.mp3', err => {
+                    console.log('mp3 file deleted');
+                  });
+                }, 300000);
                 // Send response
                 res.json({
                   fileName: title + '.mp3',
@@ -56,13 +68,4 @@ app.post('/', (req, res, next) => {
 
 app.post('/download', (req, res) => {
   res.download(req.body.fileNameServerSide + '.mp3');
-  // Delete files
-  setTimeout(() => {
-    fs.unlink(req.body.fileNameServerSide + '.mp4', err => {
-      console.log('mp4 file deleted');
-    });
-    fs.unlink(req.body.fileNameServerSide + '.mp3', err => {
-      console.log('mp3 file deleted');
-    });
-  }, 300000);
 });

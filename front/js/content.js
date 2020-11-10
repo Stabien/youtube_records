@@ -1,6 +1,7 @@
+chrome.runtime.sendMessage({ message: 'defaultIcon' });
 chrome.runtime.onMessage.addListener((request) => {
 	if (request === "API") {
-		const re = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)([\w\-]+)(\S+)?$/;
+		const re = /^(http(s)??\:\/\/)?(www\.)?((youtube\.com\/watch\?v=)|(youtu.be\/))([a-zA-Z0-9\-_])+/;
 		let body = {
 			url: window.location.href
 		};
