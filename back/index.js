@@ -16,6 +16,7 @@ app.listen(PORT, () =>
 
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   next();
@@ -29,8 +30,13 @@ app.post('/', (req, res, next) => {
     getInfo(req.body.url)
       .catch(err => {
         console.log(err);
-        if (nbRecursiveCalls <= 10)
+        console.log(nbRecursiveCalls);
+        if (nbRecursiveCalls <= 5)
           handleRequest(req, res, next);
+        else {
+          res.json({ erreur: "Impossible de convertir cette vidéo" });
+          next();
+        }
         nbRecursiveCalls++;
       })
       .then((info) => {
@@ -56,7 +62,7 @@ app.post('/', (req, res, next) => {
         // Delete files after 15 minutes
         setTimeout(() => {
           if (fs.existsSync(titleServerSide + '.mp4'))
-            fs.unlink(titleServerSide + '.mp4', () => console.log(titleServerSide + '.mp4'));
+            fs.unlink(titleServerSide + '.mp4', () => console.log('mp4 file deleted'));
           if (fs.existsSync(titleServerSide + '.mp3'))
             fs.unlink(titleServerSide + '.mp3', () => console.log('mp3 file deleted'));
         }, 900000);
@@ -66,5 +72,5 @@ app.post('/', (req, res, next) => {
 });
 
 app.post('/download', (req, res) => {
-  res.download(req.body.fileNameServerSide + '.mp4');
+  res.download(req.body.fileNameServerSide + '.mp3');
 });

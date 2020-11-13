@@ -3,7 +3,7 @@ chrome.runtime.onMessage.addListener((request) => {
 			chrome.downloads.download({ url: request.url, filename: request.fileName });
 		}
 	if (request.message === "downloadIcon") {
-		chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
+		chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
 			chrome.browserAction.setIcon({
 				tabId: tab.id,
 				path: {
@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener((request) => {
 		});
 	}
 	if (request.message === "defaultIcon") {
-		chrome.tabs.query({active: true, currentWindow: true}, ([tab]) => {
+		chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
 			chrome.browserAction.setIcon({
 				tabId: tab.id,
 				path: {
