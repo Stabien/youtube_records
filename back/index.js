@@ -45,27 +45,26 @@ app.post('/', (req, res, next) => {
             new ffmpeg({ source: titleServerSide + '.mp4' })
               .saveToFile(titleServerSide + '.mp3')
               .on('end', () => {
-                // Delete files
-                setTimeout(() => {
-                  fs.unlink(titleServerSide + '.mp4', err => {
-                    console.log('mp4 file deleted');
-                  });
-                  fs.unlink(titleServerSide + '.mp3', err => {
-                    console.log('mp3 file deleted');
-                  });
-                }, 300000);
                 // Send response
                 res.json({
                   fileName: title + '.mp3',
                   fileNameServerSide: titleServerSide
                 });
+                next();
               });
           });
+        // Delete files after 15 minutes
+        setTimeout(() => {
+          if (fs.existsSync(titleServerSide + '.mp4'))
+            fs.unlink(titleServerSide + '.mp4', () => console.log(titleServerSide + '.mp4'));
+          if (fs.existsSync(titleServerSide + '.mp3'))
+            fs.unlink(titleServerSide + '.mp3', () => console.log('mp3 file deleted'));
+        }, 900000);
       });
   }
   handleRequest(req, res, next);
 });
 
 app.post('/download', (req, res) => {
-  res.download(req.body.fileNameServerSide + '.mp3');
+  res.download(req.body.fileNameServerSide + '.mp4');
 });
