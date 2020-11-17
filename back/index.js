@@ -1,4 +1,3 @@
-const express = require('express');
 const bodyParser = require('body-parser');
 const ytdl = require('ytdl-core');
 const { getInfo } = require('ytdl-getinfo');
@@ -7,11 +6,14 @@ const converter = require('video-converter');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
 
-const app = express();
+const app = require('express')();
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+
 const PORT = process.env.PORT || 8080;
 
-app.listen(PORT, () =>
-  console.log('Serveur lancé')
+server.listen(PORT, () =>
+  console.log('socket running')
 );
 
 app.use((req, res, next) => {
@@ -29,19 +31,17 @@ app.post('/', (req, res, next) => {
   let handleRequest = (req, res, next) => {
     getInfo(req.body.url)
       .catch(err => {
-        console.log(err);
-        console.log(nbRecursiveCalls);
-        if (nbRecursiveCalls <= 5)
-          handleRequest(req, res, next);
-        else {
-          res.json({ erreur: "Impossible de convertir cette vidéo" });
-          next();
-        }
+        if (nbRecursiveCalls >= 4)
+          res.json({ error: err });
         nbRecursiveCalls++;
+        handleRequest(req, res, next);
       })
       .then((info) => {
         const title = info.items[0].title;
         const titleServerSide = title + Date.now();
+        // Send request response
+        res.json({ response: 'conversion launched' });
+        console.log('response sent');
         // Create file
         ytdl(req.body.url, { filter: 'audioonly' })
           .pipe(fs.createWriteStream(titleServerSide + '.mp4'))
@@ -51,11 +51,12 @@ app.post('/', (req, res, next) => {
             new ffmpeg({ source: titleServerSide + '.mp4' })
               .saveToFile(titleServerSide + '.mp3')
               .on('end', () => {
-                // Send response
-                res.json({
+                // Send Socket.io response
+                io.sockets.emit('fileUpload', {
                   fileName: title + '.mp3',
                   fileNameServerSide: titleServerSide
                 });
+                console.log('emit')
                 next();
               });
           });
