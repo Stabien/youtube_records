@@ -1,8 +1,7 @@
-const socket = io.connect('http://localhost:8080');
-
+const socket = io.connect('https://youtube-converter-mp3-chrome.herokuapp.com/');
 // Post request to server to download file on socket event
 socket.on('fileUpload', (data) => {
-	fetch("http://localhost:8080/download", {
+	fetch("https://youtube-converter-mp3-chrome.herokuapp.com/download", {
 		method: "POST",
 		headers: {'Content-Type': 'application/json'},
 		body: JSON.stringify(data)
@@ -10,7 +9,10 @@ socket.on('fileUpload', (data) => {
 	.then(file => file.blob())
 	.then(blob => {
 		const url = window.URL.createObjectURL(blob);
-		chrome.downloads.download({ url: url, filename: data.fileName });
+		const regex = new RegExp(/[:<>+;*/\\]/, 'g');
+		const fileName = data.fileName.replaceAll(regex, '');
+		console.log(fileName);
+		chrome.downloads.download({ url: url, filename: fileName });
 		chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
 			chrome.browserAction.setIcon({
 				tabId: tab.id,

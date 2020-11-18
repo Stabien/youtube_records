@@ -41,7 +41,6 @@ app.post('/', (req, res, next) => {
         const titleServerSide = title + Date.now();
         // Send request response
         res.json({ response: 'conversion launched' });
-        console.log('response sent');
         // Create file
         ytdl(req.body.url, { filter: 'audioonly' })
           .pipe(fs.createWriteStream(titleServerSide + '.mp4'))
@@ -56,7 +55,6 @@ app.post('/', (req, res, next) => {
                   fileName: title + '.mp3',
                   fileNameServerSide: titleServerSide
                 });
-                console.log('emit')
                 next();
               });
           });
@@ -74,4 +72,5 @@ app.post('/', (req, res, next) => {
 
 app.post('/download', (req, res) => {
   res.download(req.body.fileNameServerSide + '.mp3');
+  console.log('download');
 });
