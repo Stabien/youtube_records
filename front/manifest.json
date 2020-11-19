@@ -1,14 +1,14 @@
 {
-	"name" : "Converter",
+	"name" : "Youtube Records",
 	"version" : "1.0",
-	"description" : "Convertisseur de vidéo youtube",
+	"description" : "Convertisseur de vidéo youtube au format mp3",
 	"browser_action": {
 		"default_popup" : "default_popup.html",
-		"default_icon": "assets/icon_1.png",
+		"default_icon": "assets/icon1_128.png",
 		"icons": {
-			"16": "assets/icon_1_16.png",
-      "48": "assets/icon_1_48.png",
-      "128": "assets/icon_1.png"
+			"16": "assets/icon1_16.png",
+      "48": "assets/icon1_48.png",
+      "128": "assets/icon1_128.png"
 		}
 	},
 	"background": {
@@ -26,10 +26,8 @@
 		}
 	],
 	"permissions": [
-		"storage",
 		"downloads",
-		"tabs",
-		"<all_urls>"
+		"tabs"
 	],
 	"manifest_version" : 2
 }
