@@ -24,6 +24,18 @@ socket.on('fileUpload', (data) => {
 	});
 });
 
+socket.on('error', (data) => {
+	alert(data.error);
+	chrome.browserAction.setIcon({
+		path: {
+			'16': '../assets/icon1_16.png',
+			'48': '../assets/icon1_48.png',
+			'128': '../assets/icon1_128.png'
+		}
+	});
+	chrome.browserAction.setPopup({ popup: 'default_popup.html' });
+});
+
 // Changing icon on conversion and download
 chrome.runtime.onMessage.addListener((request) => {
 	if (request.message === 'downloadIcon') {

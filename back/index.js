@@ -5,6 +5,7 @@ const fs = require('fs');
 const converter = require('video-converter');
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 const ffmpeg = require('fluent-ffmpeg');
+const domain = require('domain');
 
 const app = require('express')();
 const server = require('http').createServer(app);
@@ -26,6 +27,34 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 
+const conversion = (nbRecursiveCalls, req, title, titleServerSide) => {
+  if (nbRecursiveCalls >= 4) {
+    io.sockets.emit('error', { error: 'Problème durant la conversion, veuillez réessayer' });
+    throw new Error('Impossible to create file');
+  }
+  const d = domain.create();
+  // Create file and rerun function if error
+  d.run(() => {
+    ytdl(req.body.url, { filter: 'audioonly' })
+      .pipe(fs.createWriteStream(titleServerSide + '.mp4'))
+      .on('finish', () => {
+        // Convert from mp4 to mp3
+        ffmpeg.setFfmpegPath(ffmpegPath);
+        new ffmpeg({ source: titleServerSide + '.mp4' })
+          .saveToFile(titleServerSide + '.mp3')
+          .on('end', () => {
+            // Send Socket.io response
+            io.sockets.emit('fileUpload', {
+              fileName: title + '.mp3',
+              fileNameServerSide: titleServerSide
+            });
+          });
+      });
+  });
+  nbRecursiveCalls += 1;
+  d.on('error', () => conversion(nbRecursiveCalls, req, title, titleServerSide));
+}
+
 app.post('/', (req, res, next) => {
   let nbRecursiveCalls = 0;
   let handleRequest = (req, res, next) => {
@@ -41,23 +70,9 @@ app.post('/', (req, res, next) => {
         const titleServerSide = title + Date.now();
         // Send request response
         res.json({ response: 'conversion launched' });
-        // Create file
-        ytdl(req.body.url, { filter: 'audioonly' })
-          .pipe(fs.createWriteStream(titleServerSide + '.mp4'))
-          .on('finish', () => {
-            // Convert from mp4 to mp3
-            ffmpeg.setFfmpegPath(ffmpegPath);
-            new ffmpeg({ source: titleServerSide + '.mp4' })
-              .saveToFile(titleServerSide + '.mp3')
-              .on('end', () => {
-                // Send Socket.io response
-                io.sockets.emit('fileUpload', {
-                  fileName: title + '.mp3',
-                  fileNameServerSide: titleServerSide
-                });
-                next();
-              });
-          });
+        nbRecursiveCalls = 0;
+        // Create and convert file
+        conversion(nbRecursiveCalls, req, title, titleServerSide);
         // Delete files after 15 minutes
         setTimeout(() => {
           if (fs.existsSync(titleServerSide + '.mp4'))

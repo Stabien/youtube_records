@@ -23,6 +23,7 @@ body {
 	width: 200px;
 	margin: 0;
 	padding: 0;
+  background: #EFEFEF;
 }
 
 ul {
@@ -34,6 +35,7 @@ ul {
 
 header {
   margin: auto;
+  background: white;
 }
 
 .container {
@@ -57,14 +59,24 @@ header h1 {
   color: black;
 }
 
-ul li {
+.ldBar {
+  margin: auto;
+  margin-top: 10px;
+  width: 140px !important;
+}
+
+.ldBar-label {
+  display: none;
+}
+
+span {
 	list-style: none;
 	display: block;
 	text-decoration: none;
   font-weight: 500;
-  background: white;
-  color: red;
+  color: black;
 	font-size: 14px;
 	text-align: center;
-	padding: 10px 0;
+	padding-bottom: 10px;
+  padding-top: 0;
 }

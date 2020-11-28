@@ -18,8 +18,10 @@ chrome.runtime.onMessage.addListener((request) => {
 		})
 		.then(response => response.json())
 		.then(response => {
-			if (response.error != null)
+			if (response.error != null) {
 				alert('Impossible de convertir cette vidéo');
+				chrome.runtime.sendMessage({ message: 'defaultIcon' });
+			}
 		});
 	}
 });
